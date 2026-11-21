@@ -13,7 +13,7 @@ Your history is only saved daily, so you might not be able to see changes in you
 For your convenience I kept some accounts I made while testing.
 
 Username: log
-Password: l*123456
+  Password: l*123456
 
 Admin Username: wolfg
-Password: 123
+  Password: 123
