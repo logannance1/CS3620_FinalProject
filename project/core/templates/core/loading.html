@@ -1,0 +1,23 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block head_tags %}
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.11/dist/htmx.min.js" integrity="sha384-2OatzQy1H+Zd/IIrjr1TcuDGqLXeHhbooAyJY1KdQMKnr4LZ22k31GBLdYKHmVjg" crossorigin="anonymous"></script>
+{% endblock %}  
+
+{% block body %}
+  <h1>{{ title }}</h1>
+  <div
+    hx-get="{{ refresh }}"
+    hx-trigger="load"
+    hx-swap="outerHTML"
+  >
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-3">Fetching latest market prices...</p>
+    </div>
+  </div>
+{% endblock %}

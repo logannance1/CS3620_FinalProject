@@ -1,0 +1,66 @@
+<h3>Portfolio Value: {{ portfolio_value }}</h3>
+
+<div class="position-relative" style="height: 400px;">
+  <canvas id="myChart"></canvas>
+</div>
+
+<div class="mt-4">
+  <h2>Holdings</h2>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Shares</th>
+        <th>Current Price</th>
+        <th>Value</th>
+        <th>Allocation</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for holding in holdings %}
+        <tr>
+          <td>
+            <a href="" class="link-body-emphasis">{{ holding.symbol }}</a>
+          </td>
+          <td>{{ holding.shares }}</td>
+          <td>{{ holding.current_price }}</td>
+          <td>{{ holding.value }}</td>
+          <td>{{ holding.allocation }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const labels = JSON.parse('{{ labels|safe }}');
+  const data = JSON.parse('{{ data|safe }}');
+  const ctx = document.getElementById('myChart');
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Portfolio Value $',
+        data: data,
+        borderColor: 'rgb(0, 192, 64)',
+        pointStyle: 'circle',
+        pointRadius: 10,
+        pointHoverRadius: 15,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          ticks: {
+            callback: (value) => "$" + value.toLocaleString()
+          }
+        }
+      }
+    },
+  });
+</script>

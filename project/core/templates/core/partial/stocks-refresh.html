@@ -1,0 +1,81 @@
+<div class="row justify-content-between">
+  <div class="col-auto">
+    <form class="row" action="" method="GET">
+      <div class="col-md-6">
+        <input
+          class="form-control"
+          type="search"
+          name="stock_name"
+          placeholder="Enter symbol..."
+          value="{{ stock_name|default:'' }}">
+      </div>
+
+      <div class="col-auto">
+        <button class="btn btn-primary" type="submit">Search</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-auto">
+    <div class="row justify-content-end align-items-center">
+      {% if stock_list.has_previous %}
+        <div class="col-auto">
+          <a class="btn btn-outline-secondary" href="{% querystring page=1 %}"><<</a>
+        </div>
+
+        <div class="col-auto">
+          <a
+            class="btn btn-outline-secondary"
+            href="{% querystring page=stock_list.previous_page_number %}"
+          >
+            <
+          </a>
+        </div>
+      {% endif %}
+
+      <div class="col-auto">
+        <span>Page {{ stock_list.number }} of {{stock_list.paginator.num_pages }}</span>
+      </div>
+
+      {% if stock_list.has_next %}
+        <div class="col-auto">
+          <a
+            class="btn btn-outline-secondary"
+            href="{% querystring page=stock_list.next_page_number %}">
+            >
+          </a>
+        </div>
+
+        <div class="col-auto">
+          <a
+            class="btn btn-outline-secondary"
+            href="{% querystring page=stock_list.paginator.num_pages %}"
+          >
+            >>
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 g-4 mt-2">
+  {% for stock in stock_list %}
+    <div class="col">
+      <div class="card shadow-sm card-hover">
+        <div class="card-body">
+          <h3 class="card-title">
+            <a
+              href="{% url 'stock-details' stock.symbol %}"
+              class="stretched-link text-decoration-none text-dark"
+            >
+              {{ stock.symbol }}
+            </a>
+          </h5>
+          <h4 class="card-subtitle text-success mt-2">${{ stock.price|floatformat:"2g" }}</h6>
+          <p class="card-text mt-2">{{ stock.desc }}</p>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
