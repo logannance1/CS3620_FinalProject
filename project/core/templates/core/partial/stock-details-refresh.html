@@ -7,7 +7,7 @@
   <canvas id="myChart"></canvas>
 </div>
 
-<div class="row mt-2">
+<div class="row mt-2 mb-4">
   <div class="col-md-8 border-end border-2">
     <h4>
       Buying Power:
@@ -24,7 +24,8 @@
 
   <form class="col" method="POST" action="">
     {% csrf_token %}
-    
+    <input type="hidden" name="price" value="{{ current_price }}">
+
     <div class="row">
       <div class="col btn-group">
         <input type="radio" class="btn-check" name="trade_type" id="trade-buy"
@@ -37,19 +38,21 @@
       </div>
     </div>
 
+    <div class="mt-4">
+      <label for="share-amount" class="form-label">Number of Shares</label>
+      <input id="share-amount" type="number" class="form-control"
+        name="share-amount" placeholder="Enter share quantity..." min="1" step="1"
+        required>
+    </div>
 
-      <div class="mt-4">
-        <label for="share-amount" class="form-label">Number of Shares</label>
-        <input id="share-amount" type="number" class="form-control"
-          name="share-amount" placeholder="Enter share quantity..." min="1" step="1"
-          required>
-      </div>
+    <p class="text-danger mt-2">{{ form_error }}</p>
 
-      <div class="row mt-4">
-        <div class="col btn-group">
-          <button class="btn btn-primary" type="submit">Submit</button>
-        </div>
+
+    <div class="row mt-2">
+      <div class="col btn-group">
+        <button class="btn btn-primary" type="submit">Submit</button>
       </div>
+    </div>
   </form>
 </div>
 

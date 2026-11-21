@@ -29,6 +29,10 @@ urlpatterns = [
     path("stocks/", core_views.stocks, name="stocks"),
     path("stocks/<slug:symbol>/", core.views.stock_details, name="stock-details"),
     path("history/", core_views.history, name="history"),
+    path("csv/", core_views.export_csv, name="csv"),
+    path("pdf/", core_views.export_pdf, name="pdf"),
+    # path("history/csv")
+    path("confirmation/<int:pk>/", core_views.confirmation, name="confirmation"),
     path("api/dashboard-refresh/", core.views.dashboard_refresh, name="dashboard-refresh"),
     path("api/stocks-refresh/", core.views.stocks_refresh, name="stocks-refresh"),
     path("api/stock-details-refresh/<slug:symbol>/",

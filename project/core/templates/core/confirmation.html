@@ -1,0 +1,39 @@
+{% extends 'core/base.html' %}
+{% block title %}Trade Confirmation{% endblock %}
+
+{% block body %}
+<h1>Trade Confirmation</h1>
+
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Symbol</th>
+        <th>Shares</th>
+        <th>Price</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ trade.user.username }}</td>
+        <td>{{ trade.date }}</td>
+        {% if trade.trade_type == "BUY" %}
+          <td class="text-success">{{ trade.trade_type }}</td>
+        {% else %}
+          <td class="text-danger">{{ trade.trade_type }}</td>
+        {% endif %}
+        <td>{{ trade.stock.symbol }}</td>
+        <td>{{ trade.shares }}</td>
+        <td>${{ trade.price|floatformat:"2g" }}</td>
+        <td>${{ trade.total|floatformat:"2g" }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<a href="{% url 'dashboard' %}">Back to Dashboard</a>
+{% endblock %}

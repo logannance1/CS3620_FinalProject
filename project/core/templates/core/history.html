@@ -3,4 +3,89 @@
 
 {% block body %}
 <h1>History</h1>
+
+{% if trades %}
+  <div class="row justify-content-between mt-4">
+    <div class="col-auto">
+      <a class="btn btn-primary" href="{% url 'csv' %}">Download CSV</a>
+      <a class="btn btn-secondary" href="{% url 'pdf' %}">Download PDF</a>
+    </div>
+    <div class="col-auto">
+      <div class="row justify-content-end align-items-center">
+        {% if trades.has_previous %}
+          <div class="col-auto">
+            <a class="btn btn-outline-secondary" href="{% querystring page=1 %}"><<</a>
+          </div>
+
+          <div class="col-auto">
+            <a
+              class="btn btn-outline-secondary"
+              href="{% querystring page=trades.previous_page_number %}"
+            >
+              <
+            </a>
+          </div>
+        {% endif %}
+
+        <div class="col-auto">
+          <span>Page {{ trades.number }} of {{ trades.paginator.num_pages }}</span>
+        </div>
+
+        {% if trades.has_next %}
+          <div class="col-auto">
+            <a
+              class="btn btn-outline-secondary"
+              href="{% querystring page=trades.next_page_number %}">
+              >
+            </a>
+          </div>
+
+          <div class="col-auto">
+            <a
+              class="btn btn-outline-secondary"
+              href="{% querystring page=trades.paginator.num_pages %}"
+            >
+              >>
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Symbol</th>
+          <th>Shares</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for trade in trades %}
+          <tr>
+            <td>{{ trade.user.username }}</td>
+            <td>{{ trade.date }}</td>
+            {% if trade.trade_type == "BUY" %}
+              <td class="text-success">{{ trade.trade_type }}</td>
+            {% else %}
+              <td class="text-danger">{{ trade.trade_type }}</td>
+            {% endif %}
+            <td>{{ trade.stock.symbol }}</td>
+            <td>{{ trade.shares }}</td>
+            <td>${{ trade.price|floatformat:"2g" }}</td>
+            <td>${{ trade.total|floatformat:"2g" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p>No history available, try making a trade.</p>
+{% endif %}
 {% endblock %}

@@ -7,4 +7,4 @@ def fetch_prices(symbols):
     return yf.download(symbols, period="1d", interval="1d")["Close"].iloc[-1]
 
 def fetch_stock_history(symbol):
-    return yf.Ticker(symbol).history(period="1mo")["Close"]
+    return yf.Ticker(symbol).history(period="1mo")["Close"].dropna()

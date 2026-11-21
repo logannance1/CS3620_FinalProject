@@ -1,11 +1,15 @@
+import csv
+from decimal import Decimal
 import json
-from django.http import Http404, HttpResponseBadRequest
+from django.http import Http404, HttpResponseBadRequest, HttpResponse
+import pdfkit
 import yfinance as yf
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.core.cache import cache
 from django.core.paginator import Paginator
+from django.template import loader
 from core import models
 from core import services
 
@@ -118,22 +122,67 @@ def stocks_refresh(request):
 @login_required
 def stock_details(request, symbol):
     symbol = symbol.upper()
+    form_error = ""
 
     if request.method == "POST":
+        stock = models.Stock.objects.get(symbol=symbol)
         trade_type = request.POST.get("trade_type")
+        shares = int(request.POST.get("share-amount"))
+        price = Decimal(request.POST.get("price"))
+        total = shares * price
+        trade = models.Trade(user=request.user,
+            stock=stock, shares=shares, price=price)
 
         if trade_type == "buy":
-            trade_type = models.Trade.TradeType.BUY
+            trade.trade_type = models.Trade.TradeType.BUY
+            user_cash = models.UserCash.objects.get(user=request.user)
+
+            if user_cash.cash >= total:
+                user_cash.cash -= total
+
+                holding, created = models.Holding.objects.get_or_create(
+                    user=request.user,
+                    symbol=symbol,
+                    defaults={ "shares": shares }
+                )
+
+                if not created:
+                    holding.shares += shares
+                    holding.save()
+                
+                user_cash.save()
+                trade.save()
+                return redirect("confirmation", pk=trade.pk)
+            else:
+                form_error = "Buy trade cannot exceed buying power!"
         elif trade_type == "sell":
-            trade_type = models.Trade.TradeType.SELL
+            trade.trade_type = models.Trade.TradeType.SELL
+            holding = models.Holding.objects.filter(user=request.user,
+                symbol=symbol).first()
+
+            if holding:
+                if holding.shares < shares:
+                    form_error = "Sell trade cannot exceed shares owned!"
+                else:
+                    if holding.shares == shares:
+                        holding.delete()
+                    else:
+                        holding.shares -= shares
+                        holding.save()
+
+                    user_cash = models.UserCash.objects.get(user=request.user)
+                    user_cash.cash += total
+                    user_cash.save()
+                    trade.save()
+                    return redirect("confirmation", pk=trade.pk)
+            else:
+                form_error = "Sell trade cannot exceed shares owned!"
         else:
             return HttpResponseBadRequest("Invalid trade type")
         
-        
-
     return render(request, 'core/loading.html', {
         "title": symbol,
-        'refresh': f"/api/stock-details-refresh/{symbol}"
+        'refresh': f"/api/stock-details-refresh/{symbol}/?form_error={form_error}",
     })
 
 @login_required
@@ -143,20 +192,79 @@ def stock_details_refresh(request, symbol):
     labels = history.index.strftime("%b %d, %Y").tolist()
     data = history.astype(float).tolist()
     cash = models.UserCash.objects.get(user=request.user).cash
+    form_error = request.GET.get("form_error")
     holding = models.Holding.objects \
         .filter(user=request.user, symbol=stock.symbol).first()
 
     shares = 0 if not holding else holding.shares
+    current_price = data[-1]
 
     return render(request, "core/partial/stock-details-refresh.html", {
-        "current_price": data[-1],
+        "current_price": current_price,
         "buying_power": cash,
         "shares_owned": shares,
         "desc": stock.desc,
+        "form_error": form_error,
         "labels": json.dumps(labels),
         "data": json.dumps(data),
     })
 
 @login_required
+def confirmation(request, pk):
+    trade = get_object_or_404(models.Trade, pk=pk, user=request.user)
+    trade.total = trade.shares * trade.price
+    return render(request, "core/confirmation.html", { "trade": trade })
+
+@login_required
 def history(request):
-    return render(request, 'core/history.html')
+    trades = models.Trade.objects.filter(user=request.user)
+    paginator = Paginator(trades, 10)
+    page = request.GET.get("page")
+    trades = paginator.get_page(page)
+
+    for trade in trades:
+        trade.total = trade.shares * trade.price
+
+    return render(request, 'core/history.html', { "trades": trades })
+
+@login_required
+def export_pdf(request):
+    trades = models.Trade.objects.filter(user=request.user)
+
+    for trade in trades:
+        trade.total = trade.shares * trade.price
+
+    template = loader.get_template('core/pdf.html')
+    html = template.render({ "trades": trades })
+    options = {
+        "page-size": "Letter",
+        "encoding": "UTF-8",
+    }
+    filename = "history.pdf"
+    output = pdfkit.from_string(html, False, options)
+    response = HttpResponse(output, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+@login_required
+def export_csv(request):
+    filename = "history.csv"
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    writer = csv.writer(response)
+    fields = ["User", "Date", "Type", "Symbol", "Shares", "Price", "Total"]
+    writer.writerow(fields)
+    trades = models.Trade.objects.filter(user=request.user)
+    for trade in trades:
+        total = trade.shares * trade.price
+        writer.writerow([
+            trade.user.username,
+            trade.date,
+            trade.trade_type,
+            trade.stock.symbol,
+            trade.shares,
+            trade.price,
+            total
+        ])
+
+    return response
