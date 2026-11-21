@@ -8,7 +8,7 @@
 </div>
 
 <div class="row mt-2 mb-4">
-  <div class="col-md-8 border-end border-2">
+  <div class="col-md-8">
     <h4>
       Buying Power:
       <span class="text-success">${{ buying_power|floatformat:"2g" }}</span>
@@ -22,35 +22,36 @@
     <p>{{ desc }}</p>
   </div>
 
-  <form class="col" method="POST" action="">
+  <form class="col card shadow-sm" method="POST" action="">
     {% csrf_token %}
-    <input type="hidden" name="price" value="{{ current_price }}">
+    <div class="card-body">
+      <input type="hidden" name="price" value="{{ current_price }}">
 
-    <div class="row">
-      <div class="col btn-group">
-        <input type="radio" class="btn-check" name="trade_type" id="trade-buy"
-          value="buy" autocomplete="off" checked>
-        <label class="btn btn-outline-success fs-4" for="trade-buy">Buy</label>
+      <div class="row">
+        <div class="col btn-group">
+          <input type="radio" class="btn-check" name="trade_type" id="trade-buy"
+            value="buy" autocomplete="off" checked>
+          <label class="btn btn-outline-success fs-4" for="trade-buy">Buy</label>
 
-        <input type="radio" class="btn-check" name="trade_type" id="trade-sell"
-          value="sell" autocomplete="off">
-        <label class="btn btn-outline-danger fs-4" for="trade-sell">Sell</label>
+          <input type="radio" class="btn-check" name="trade_type" id="trade-sell"
+            value="sell" autocomplete="off">
+          <label class="btn btn-outline-danger fs-4" for="trade-sell">Sell</label>
+        </div>
       </div>
-    </div>
 
-    <div class="mt-4">
-      <label for="share-amount" class="form-label">Number of Shares</label>
-      <input id="share-amount" type="number" class="form-control"
-        name="share-amount" placeholder="Enter share quantity..." min="1" step="1"
-        required>
-    </div>
+      <div class="mt-4">
+        <label for="share-amount" class="form-label">Number of Shares</label>
+        <input id="share-amount" type="number" class="form-control"
+          name="share-amount" placeholder="Enter share quantity..." min="1" step="1"
+          required>
+      </div>
 
-    <p class="text-danger mt-2">{{ form_error }}</p>
+      <p class="text-danger mt-2">{{ form_error }}</p>
 
-
-    <div class="row mt-2">
-      <div class="col btn-group">
-        <button class="btn btn-primary" type="submit">Submit</button>
+      <div class="row mt-2">
+        <div class="col btn-group">
+          <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
       </div>
     </div>
   </form>

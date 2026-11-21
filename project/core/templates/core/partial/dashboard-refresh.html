@@ -1,36 +1,48 @@
-<h3>Portfolio Value: {{ portfolio_value }}</h3>
+<h3>
+  Portfolio Value:
+  <span class="text-success">${{ portfolio_value|floatformat:"2g" }}</span>
+</h3>
+
+<h4>
+  Buying Power:
+  <span class="text-success">${{ buying_power|floatformat:"2g" }}</span>
+</h4>
 
 <div class="position-relative" style="height: 400px;">
   <canvas id="myChart"></canvas>
 </div>
 
-<div class="mt-4">
+<div class="my-4">
   <h2>Holdings</h2>
-
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Symbol</th>
-        <th>Shares</th>
-        <th>Current Price</th>
-        <th>Value</th>
-        <th>Allocation</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for holding in holdings %}
+  {% if holdings %}
+    <table class="table shadow-sm">
+      <thead>
         <tr>
-          <td>
-            <a href="" class="link-body-emphasis">{{ holding.symbol }}</a>
-          </td>
-          <td>{{ holding.shares }}</td>
-          <td>{{ holding.current_price }}</td>
-          <td>{{ holding.value }}</td>
-          <td>{{ holding.allocation }}</td>
+          <th>Symbol</th>
+          <th>Shares</th>
+          <th>Current Price</th>
+          <th>Value</th>
+          <th>Allocation</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% for holding in holdings %}
+          <tr>
+            <td>
+              <a href="{% url 'stock-details' holding.symbol %}"
+                class="link-body-emphasis">{{ holding.symbol }}</a>
+            </td>
+            <td>{{ holding.shares }}</td>
+            <td>${{ holding.current_price|floatformat:"2g" }}</td>
+            <td>${{ holding.value|floatformat:"2g" }}</td>
+            <td>{{ holding.allocation|floatformat:2 }}%</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <span>No holdings available, try buying a stock.</span>
+  {% endif %}
 </div>
 
 <script>

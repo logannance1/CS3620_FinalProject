@@ -54,7 +54,7 @@
   </div>
 
   <div class="table-responsive">
-    <table class="table table-striped align-middle">
+    <table class="table table-striped align-middle shadow-sm">
       <thead>
         <tr>
           <th>User</th>
@@ -76,7 +76,13 @@
             {% else %}
               <td class="text-danger">{{ trade.trade_type }}</td>
             {% endif %}
-            <td>{{ trade.stock.symbol }}</td>
+            <td>
+              <a class="link-body-emphasis"
+                href="{% url 'stock-details' trade.stock.symbol %}"
+              >
+                {{ trade.stock.symbol }}
+              </a>
+            </td>
             <td>{{ trade.shares }}</td>
             <td>${{ trade.price|floatformat:"2g" }}</td>
             <td>${{ trade.total|floatformat:"2g" }}</td>

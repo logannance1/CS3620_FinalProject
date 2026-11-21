@@ -28,45 +28,35 @@ def dashboard_refresh(request):
     user_cash, _ = models.UserCash.objects.get_or_create(user=request.user)
     cash = float(user_cash.cash)
     portfolio_value = cash
-    symbols = [holding.symbol for holding in holdings]
-    key = f"user_{request.user.id}_holdings"
-    prices = cache.get_or_set(key, lambda: services.fetch_prices(symbols), 300)
-
-    for holding in holdings:
-        holding.current_price = prices[holding.symbol]
-        holding.value = holding.current_price * holding.shares
-        portfolio_value += holding.value
-
-    for holding in holdings:
-        holding.allocation = f"{holding.value / portfolio_value * 100:.2f}%"
-        holding.current_price = f"${holding.current_price:,.2f}"
-        holding.value = f"${holding.value:,.2f}"
-
+    if holdings:
+        symbols = [holding.symbol for holding in holdings]
+        key = f"user_{request.user.id}_holdings"
+        prices = cache.get_or_set(key, lambda: services.fetch_prices(symbols), 300)
+        for holding in holdings:
+            holding.current_price = prices[holding.symbol]
+            holding.value = holding.current_price * holding.shares
+            portfolio_value += holding.value
+        for holding in holdings:
+            holding.allocation = holding.value / portfolio_value * 100
     models.PortfolioHistory.objects.update_or_create(
         user=request.user,
         date=today,
-
         defaults={
             'value': portfolio_value,
         }
     )
-
-    portfolio_value = f"${portfolio_value:,.2f}"
-
     history = reversed(
         list(models.PortfolioHistory.objects.filter(user=request.user) \
         .order_by('-date')[:50])
     )
-
     labels = []
     data = []
-
     for h in history:
         labels.append(h.date.strftime("%b %d, %Y"))
         data.append(float(h.value))
-    
     return render(request, 'core/partial/dashboard-refresh.html', {
         "portfolio_value": portfolio_value,
+        "buying_power": cash,
         "holdings": holdings,
         "labels": json.dumps(labels),
         'data': json.dumps(data),
@@ -268,3 +258,6 @@ def export_csv(request):
         ])
 
     return response
+
+def disclaimer(request):
+    return render(request, "core/disclaimer.html")
