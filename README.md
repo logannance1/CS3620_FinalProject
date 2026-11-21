@@ -1,3 +1,5 @@
+<img width="956" height="493" alt="image" src="https://github.com/user-attachments/assets/c977dba6-fb2e-40f6-9853-a2503d41f528" />
+
 - Clone the project
 - In CS3620_FinalProject dir
 - Make a venv by running python -m venv env
